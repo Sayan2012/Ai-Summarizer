@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Text Summarizer</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 40px auto;
+      max-width: 600px;
+      padding: 0 20px;
+      background: #f5f5f5;
+      color: #222;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      border: none;
+      background-color: #0078d7;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #005ea3;
+    }
+    .summary-container {
+      margin-top: 30px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      position: relative;
+    }
+    /* Loader style */
+    #loader {
+      display: none;
+      margin: 20px auto;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #0078d7;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    /* Copy button */
+    #copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #0078d7;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease;
+    }
+    #copy-btn:hover {
+      background-color: #005ea3;
+    }
+    #copy-btn:active {
+      background-color: #004077;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Text Summarizer</h1>
+  <form id="summary-form">
+    <textarea name="text" id="text-input" placeholder="Paste your text here..." required></textarea>
+    <br />
+    <button type="submit">Summarize</button>
+  </form>
+
+  <div id="loader"></div>
+
+  <div id="summary" class="summary-container" style="display:none;">
+    <button id="copy-btn">Copy</button>
+    <h2>Summary:</h2>
+    <p id="summary-text"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('summary-form');
+    const loader = document.getElementById('loader');
+    const summaryContainer = document.getElementById('summary');
+    const summaryText = document.getElementById('summary-text');
+    const copyBtn = document.getElementById('copy-btn');
+    const textInput = document.getElementById('text-input');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = textInput.value.trim();
+      if (!text) return;
+
+      loader.style.display = 'block';
+      summaryContainer.style.display = 'none';
+
+      try {
+        const response = await fetch('/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to summarize text');
+        }
+
+        const data = await response.json();
+        summaryText.textContent = data.summary;
+        summaryContainer.style.display = 'block';
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        loader.style.display = 'none';
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(summaryText.textContent).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+      });
+    });
+  </script>
+</body>
+</html>
