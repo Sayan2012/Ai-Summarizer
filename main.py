@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 model_name = "sshleifer/distilbart-cnn-12-6"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-summarizer = pipeline("summarization", model=model_name)
+summarizer = pipeline("summarization", model="./model", tokenizer="./model")
 
 @app.route("/")
 def index():
@@ -34,3 +34,4 @@ def summarize():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
